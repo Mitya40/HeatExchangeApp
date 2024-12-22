@@ -1,0 +1,54 @@
+﻿@model List<InitData>
+
+    <table class="table table-hover" >
+    <tr>
+    <th>Высота слоя, м </th>
+    <th> Начальная температура материала, °C</th>
+    <th>Начальная температура газа, °C </th>
+    <th>Скорость газа на свободное сечение шихты, м/с </th>
+    <th> Средняя теплоемкость газа, кДж/(м3 • К)</th>
+    <th>Расход материалов </th>
+    <th> Теплоемкость материалов, кДж/(кг • К)</th>
+    <th>Объемный коэффициент теплоотдачи, Вт/(м3 • К) </th>
+    <th> Диаметр аппарата, м</th>
+    <th> Действие</th>
+    </tr>
+    <a href="/home/results" class="btn btn-primary">Новый расчет</a>
+    @foreach(var item in Model)
+    {
+        <tr>
+            <td>@item.LayerHeight</td>
+            <td>@item.InitTempMaterial</td>
+            <td>@item.InitTempGas</td>
+            <td>@item.GasSpeed</td>
+            <td>@item.AvgGasHeatCapacity</td>
+            <td>@item.MaterialRate</td>
+            <td>@item.MaterialHeatCapacity</td>
+            <td>@item.VolCoeffHeatTransfer</td>
+            <td>@item.MachineDiameter</td>
+            <td>
+                <a href="/home/results/@item.Id">Открыть</a>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a href="/home/delete/@item.Id">Удалить</a>
+                }
+            </td>
+        </tr>
+    }
+</table>
+
+<style>
+   .form-label {
+        font-weight: bold;
+        text-align: left;
+        display: block;
+    }
+
+    .form-control, .form-select, button {
+        width: 100%;
+    }
+
+    .col-6 {
+        max-width: 50%;
+    }
+</style>

@@ -1,0 +1,258 @@
+﻿@model HomeViewModel
+
+@{
+    ViewData["Title"] = "Results";
+}
+
+<div class="container mt-4">
+    <form asp-action="Results" method="post">
+        <!-- Сетка для формы -->
+        <div class="row">
+            <!-- Левый столбец -->
+            <div class="col-md-4 mb-4">
+                <div class="mb-3">
+                    <label for="LayerHeight" class="form-label">Высота слоя, м</label>
+                    <input type="text" name="LayerHeight" class="form-control" id="LayerHeight" value="@Model.LayerHeight" />
+                </div>
+                <div class="mb-3">
+                    <label for="InitTempMaterial" class="form-label">Начальная температура материала, °C</label>
+                    <input type="text" name="InitTempMaterial" class="form-control" id="InitTempMaterial" value="@Model.InitTempMaterial" />
+                </div>
+                <div class="mb-3">
+                    <label for="InitTempGas" class="form-label">Начальная температура газа, °C</label>
+                    <input type="text" name="InitTempGas" class="form-control" id="InitTempGas" value="@Model.InitTempGas" />
+                </div>
+            </div>
+
+            <!-- Средний столбец -->
+            <div class="col-md-4 mb-4">
+                <div class="mb-3">
+                    <label for="GasSpeed" class="form-label">Скорость газа на свободное сечение шихты, м/с</label>
+                    <input type="text" name="GasSpeed" class="form-control" id="GasSpeed" value="@Model.GasSpeed" />
+                </div>
+                <div class="mb-3">
+                    <label for="MachineDiameter" class="form-label">Диаметр аппарата, м</label>
+                    <input type="text" name="MachineDiameter" class="form-control" id="MachineDiameter" value="@Model.MachineDiameter" />
+                </div>
+                <div class="mb-3">
+                    <label for="AvgGasHeatCapacity" class="form-label">Средняя теплоемкость газа, кДж/(м3 • К)</label>
+                    <input type="text" name="AvgGasHeatCapacity" class="form-control" id="AvgGasHeatCapacity" value="@Model.AvgGasHeatCapacity" />
+                </div>
+            </div>
+
+            <!-- Правый столбец -->
+            <div class="col-md-4 mb-4">
+
+                <div class="mb-3">
+                    <label for="MaterialRate" class="form-label">Расход материалов</label>
+                    <input type="text" name="MaterialRate" class="form-control" id="MaterialRate" value="@Model.MaterialRate" />
+                </div>
+                <div class="mb-3">
+                    <label for="MaterialHeatCapacity" class="form-label">Теплоемкость материалов, кДж/(кг • К)</label>
+                    <input type="text" name="MaterialHeatCapacity" class="form-control" id="MaterialHeatCapacity" value="@Model.MaterialHeatCapacity" />
+                </div>
+                <div class="mb-3">
+                    <label for="VolCoeffHeatTransfer" class="form-label">Объемный коэффициент теплоотдачи, Вт/(м3 • К)</label>
+                    <input type="text" name="VolCoeffHeatTransfer" class="form-control" id="VolCoeffHeatTransfer" value="@Model.VolCoeffHeatTransfer" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки управления -->
+        <div class="text-center mt-4">
+            <button class="btn btn-primary" name="action" value="add">Добавить</button>
+            <button class="btn btn-secondary" name="action" value="show" style="margin-left: 10px;">Показать</button>
+        </div>
+    </form>
+</div>
+
+@if (Model?.Results != null && Model.Results.Any())
+{
+    <div>
+        <label class="form-label">Результаты:</label>
+        <table class="table table-bordered" style="width: 100%; text-align: center;">
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Параметры</th>
+                    @foreach (var result in Model.Results)
+                    {
+                        <th style="width: @(80 / Model.Results.Count())%;">@result.HeightCoordinate м</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Температура газа, °C</td>
+                    @foreach (var result in Model.Results)
+                    {
+                        <td>@result.TempGas</td>
+                    }
+                </tr>
+                <tr>
+                    <td>Температура материала, °C</td>
+                    @foreach (var result in Model.Results)
+                    {
+                        <td>@result.TempMaterial</td>
+                    }
+                </tr>
+                <tr>
+                    <td>Разность температур, °C</td>
+                    @foreach (var result in Model.Results)
+                    {
+                        <td>@result.TempDiff</td>
+                    }
+                </tr>
+            </tbody>
+        </table>
+        <div id="charts" class="mt-4">
+            <h3>Графики:</h3>
+            <div class="row">
+                <!-- Первый график -->
+                <div class="col-md-6">
+                    <canvas id="tempCombChart"></canvas>
+                </div>
+
+                <!-- Второй график -->
+                <div class="col-md-6">
+                    <canvas id="tempDiffChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const HeightCoordinate = @Html.Raw(Json.Serialize(Model.Results.Select(r => r.HeightCoordinate)));
+            const TempGas = @Html.Raw(Json.Serialize(Model.Results.Select(r => r.TempGas)));
+            const TempMaterial = @Html.Raw(Json.Serialize(Model.Results.Select(r => r.TempMaterial)));
+            const TempDiff = @Html.Raw(Json.Serialize(Model.Results.Select(r => r.TempDiff)));
+
+            // График температур газа и материала
+            new Chart(document.getElementById('tempCombChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: HeightCoordinate,
+                    datasets: [
+                        {
+                            label: 'Температура газа, °C',
+                            data: TempGas,
+                            backgroundColor: 'rgba(46, 118, 228, 0.2)',
+                            borderColor: 'rgba(46, 118, 228, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                        },
+                        {
+                            label: 'Температура материала, °C',
+                            data: TempMaterial,
+                            backgroundColor: 'rgba(228, 64, 46, 0.2)',
+                            borderColor: 'rgba(228, 64, 46, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Высота слоя (м)',
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Температура (°C)',
+                            }
+                        }
+                    }
+                }
+            });
+
+            // График разности температур
+            new Chart(document.getElementById('tempDiffChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: HeightCoordinate,
+                    datasets: [
+                        {
+                            label: 'Разность температур, °C',
+                            data: TempDiff,
+                            backgroundColor: 'rgba(173, 46, 228, 0.2)',
+                            borderColor: 'rgba(173, 46, 228, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Высота слоя (м)',
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Температура (°C)',
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+
+
+
+    </div>
+}
+
+<style>
+    .form-label {
+        font-weight: bold;
+        text-align: left;
+        display: block;
+    }
+
+    .form-control {
+        width: 100%;
+    }
+
+    .col-md-4 {
+        max-width: 100%;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    .container
+    {
+        max-width: 1280px;
+    }
+</style>
+
+<script>
+    // Функция для замены точки на запятую
+    function replaceDotWithComma(event) {
+        event.target.value = event.target.value.replace('.', ',');
+    }
+
+    // Применяем обработчик ко всем полям с числовыми значениями
+    document.querySelectorAll('input[type="text"]').forEach(function (input) {
+        input.addEventListener('input', replaceDotWithComma);
+    });
+</script>

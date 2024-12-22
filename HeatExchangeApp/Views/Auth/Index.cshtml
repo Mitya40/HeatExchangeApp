@@ -1,0 +1,40 @@
+﻿@model HomeViewModel
+
+@{
+    ViewData["Title"] = "Авторизация";
+}
+
+<div class="text-center">
+    <form action="/auth/" method="post">
+        <div class="row justify-content-center">
+            <div class="col-4">
+                <div class="mb-3">
+                    <label for="login" class="form-label">Логин</label>
+                    <input type="text" name="login" class="form-control" rows="1" id="login" />
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-4">
+                <div class="mb-3">
+                    <label for="password" class="form-label">Пароль</label>
+                    <input type="password" name="password" class="form-control" id="password" rows="1" />
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-4">
+                <button class="btn btn-primary">Авторизоваться</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+   .form-label {
+    font-weight: bold;
+}
+    .form-control, .form-select, button {
+        width: 100%;
+    }
+</style>
